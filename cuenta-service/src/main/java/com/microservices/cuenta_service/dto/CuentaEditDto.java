@@ -1,8 +1,6 @@
 package com.microservices.cuenta_service.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,13 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Data
-public class CuentaDto {
+public class CuentaEditDto {
 
-	private String numeroCuenta;
-	private String saldo;
 	private String tipoCuenta;
-	private String clienteId;
 	private String estado;
+	private String saldoInicial;
 }

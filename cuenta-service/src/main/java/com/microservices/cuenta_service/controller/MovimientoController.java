@@ -21,25 +21,27 @@ import com.microservices.cuenta_service.dto.CuentaDto;
 import com.microservices.cuenta_service.dto.CuentaEditDto;
 import com.microservices.cuenta_service.dto.CuentaResponseDto;
 import com.microservices.cuenta_service.dto.MensajeDto;
-import com.microservices.cuenta_service.service.CuentaService;
+import com.microservices.cuenta_service.dto.MovimientoDto;
+import com.microservices.cuenta_service.dto.MovimientoResponseDto;
+import com.microservices.cuenta_service.service.MovimientoService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/cuentas")
+@RequestMapping("/movimientos")
 @RequiredArgsConstructor
-public class CuentaController {
+public class MovimientoController {
 
 	@Autowired
-	private CuentaService cuentaService;
-	
+	private MovimientoService movimientoService;
 	public static final String MENSAJE = "mensaje";
+
 	
-	@GetMapping(value = "/{cuentaId}", produces = "application/json")
-	public CuentaDto getCuenta(@PathVariable Long cuentaId) throws Exception{
+	@GetMapping(value = "/{movimientoId}", produces = "application/json")
+	public MovimientoDto getMovimiento(@PathVariable Long movimientoId) throws Exception{
 		try {
-			CuentaDto cuenta = cuentaService.getCuentaDto(cuentaId); 
-			return cuenta;
+			MovimientoDto movimiento = movimientoService.getMomivimientoDto(movimientoId); 
+			return movimiento;
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
@@ -47,25 +49,25 @@ public class CuentaController {
 	}
 	
 	@GetMapping
-	public List<CuentaDto> getAllCuentas() throws Exception{
+	public List<MovimientoDto> getAllMovimientos() throws Exception{
 		Map<String, Object> responseMap = new HashMap<>();
 		CuentaResponseDto cuentaResponseDto;
 		try {
-			return this.cuentaService.listCuentas();
+			return this.movimientoService.listMovimientos();
 		} catch (Exception e) {
 			responseMap.put(MENSAJE, "Error");
 			responseMap.put("mensaje", e.toString());
-			return (List<CuentaDto>) new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+			return (List<MovimientoDto>) new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
 		}
 	}
 
 	@PostMapping(value = "save", produces = "application/json")
 	@ResponseBody
-	public ResponseEntity<?> saveCuenta(@RequestBody CuentaDto cuentaDto) {
+	public ResponseEntity<?> saveMovimiento(@RequestBody MovimientoDto movimientoDto) {
 		Map<String, Object> responseMap = new HashMap<>();
 		CuentaResponseDto cuentaResponseDto;
 		try {
-			cuentaService.saveDTO(cuentaDto);
+			movimientoService.saveDTO(movimientoDto);
 			cuentaResponseDto = new CuentaResponseDto(true, "Exito");
 		} catch (Exception e) {
 			responseMap.put(MENSAJE, "Error");
@@ -77,12 +79,12 @@ public class CuentaController {
 	
 	@PutMapping(value = "edit/{cuentaId}", produces = "application/json")
 	@ResponseBody
-	public ResponseEntity<?> editarCuenta(@PathVariable("cuentaId") Long cuentaId,
-			@RequestBody CuentaEditDto cuentaEditDto) throws Exception {
+	public ResponseEntity<?> editarCuenta(@PathVariable("movimientoId") Long movimientoId,
+			@RequestBody MovimientoDto movimientoDto) throws Exception {
 		Map<String, Object> responseMap = new HashMap<>();
 		MensajeDto mensajeDto = null;
 		try {
-			cuentaService.updateCuenta(cuentaId, cuentaEditDto);
+			movimientoService.updateMovimiento(movimientoId, movimientoDto);
 		} catch (Exception e) {
 			responseMap.put(MENSAJE, "Error");
 			responseMap.put("mensaje", e.toString());
@@ -91,14 +93,14 @@ public class CuentaController {
 		return new ResponseEntity<MensajeDto>(mensajeDto, HttpStatus.OK);
 	}
 
-	@DeleteMapping(value = "delete/{cuentaId}", produces = "application/json")
+	@DeleteMapping(value = "delete/{movimientoId}", produces = "application/json")
 	@ResponseBody
-	public ResponseEntity<?> borrarCuenta(@PathVariable("cuentaId") Long cuentaId) {
+	public ResponseEntity<?> borrarMovimiento(@PathVariable("movimientoId") Long movimientoId) {
 		Map<String, Object> responseMap = new HashMap<>();
 		MensajeDto mensajeDto;
 
 		try {
-			cuentaService.deleteCuenta(cuentaId);
+			movimientoService.deleteMovimiento(movimientoId);
 			mensajeDto = new MensajeDto(true, "Registro eliminado");
 		} catch (Exception e) {
 			responseMap.put(MENSAJE, "Error");
@@ -106,5 +108,18 @@ public class CuentaController {
 			return new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
 		}
 		return new ResponseEntity<MensajeDto>(mensajeDto, HttpStatus.OK);
-	}	
+	}
+	
+	@GetMapping(name="/reporteMovimiento", produces = "application/json")
+	public List<MovimientoResponseDto> getReporte() throws Exception{
+		Map<String, Object> responseMap = new HashMap<>();
+		CuentaResponseDto cuentaResponseDto;
+		try {
+			return this.movimientoService.getReportePorUsuario();
+		} catch (Exception e) {
+			responseMap.put(MENSAJE, "Error");
+			responseMap.put("mensaje", e.toString());
+			return (List<MovimientoResponseDto>) new ResponseEntity<Map<String, Object>>(responseMap, HttpStatus.BAD_REQUEST);
+		}
+	}
 }

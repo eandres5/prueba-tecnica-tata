@@ -13,11 +13,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @Data
-public class CuentaDto {
+public class MovimientoDto {
 
-	private String numeroCuenta;
-	private String saldo;
-	private String tipoCuenta;
+	private String numeroDeCuenta;
+	private String tipoMovimiento;
+	private String valor;
 	private String clienteId;
-	private String estado;
+	private String fecha;
+	private String saldo;
+
 }

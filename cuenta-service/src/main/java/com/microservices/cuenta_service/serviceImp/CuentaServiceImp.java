@@ -2,18 +2,18 @@ package com.microservices.cuenta_service.serviceImp;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.microservices.cuenta_service.dao.CuentaDao;
-import com.microservices.cuenta_service.dto.BaseReponse;
 import com.microservices.cuenta_service.dto.CuentaDto;
+import com.microservices.cuenta_service.dto.CuentaEditDto;
 import com.microservices.cuenta_service.mode.entities.Cuenta;
 import com.microservices.cuenta_service.service.CuentaService;
 
-import io.netty.handler.codec.http.HttpContentEncoder.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,20 +29,20 @@ public class CuentaServiceImp implements CuentaService {
     private WebClient.Builder webClientBuilder;
 	
 	@Override
-	public void updateCliente(Long clienteId, CuentaDto cuentaDto) throws Exception {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	public List<CuentaDto> listCuentas() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		var cuentas = cuentaDao.findAll();
+		return cuentas.stream().map(this::mapToCuentaDto).toList();
 	}
 
 	@Override
 	public CuentaDto getCuentaDto(Long cuentaId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		Cuenta cuenta = getCuenta(cuentaId); 
+		return CuentaDto.builder()
+	            .clienteId(cuenta.getClienteId()+"")
+	            .numeroCuenta(cuenta.getNumeroCuenta())
+	            .tipoCuenta(cuenta.getTipoCuenta())
+	            .saldo(cuenta.getSaldoInicial()+"")
+	            .build(); 
 	}
 
 	@Override
@@ -73,12 +73,6 @@ public class CuentaServiceImp implements CuentaService {
 		}
 	}
 
-	@Override
-	public void deleteCliente(Long clienteId) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
 	private void save(Cuenta cuenta) throws Exception {
 		try {
 			cuentaDao.save(cuenta);
@@ -86,6 +80,47 @@ public class CuentaServiceImp implements CuentaService {
 			throw new Exception("error: " + e.getMessage());
 		}
 	}
-	
 
+	@Override
+	public void deleteCuenta(Long cuentaId) throws Exception {
+		try {
+			Cuenta cuenta = getCuenta(cuentaId);
+			cuentaDao.delete(cuenta);
+		} catch (Exception e) {
+			throw new Exception("error: " + e.getMessage());
+		}
+	}
+
+	@Override
+	public void updateCuenta(Long cuentaId, CuentaEditDto cuentaDto) throws Exception {
+		Cuenta cuenta = getCuenta(cuentaId);
+		cuenta.setSaldoInicial(new BigDecimal(cuentaDto.getSaldoInicial()));
+		cuenta.setTipoCuenta(cuentaDto.getTipoCuenta());
+		cuenta.setEstado(Boolean.parseBoolean(cuentaDto.getEstado()));
+		cuentaDao.save(cuenta);
+	}
+	
+	public Cuenta getCuenta(Long cuentaId) throws Exception {
+		return cuentaDao.getReferenceById(cuentaId);
+	}
+
+	private CuentaDto mapToCuentaDto(Cuenta cuenta) {
+		return CuentaDto.builder()
+	            .clienteId(cuenta.getClienteId()+"")
+	            .numeroCuenta(cuenta.getNumeroCuenta())
+	            .tipoCuenta(cuenta.getTipoCuenta())
+	            .saldo(cuenta.getSaldoInicial()+"")
+	            .build();
+	}
+
+	@Override
+	public Cuenta getCuentaByNumeroCuenta(String numeroCuenta) throws Exception {
+		Optional<Cuenta> cuenta = cuentaDao.findByNumeroCuenta(numeroCuenta);
+	    if (cuenta != null) {
+	        Cuenta cuentaEntity = cuenta.get();
+	        return cuentaEntity;
+	    } else {
+	        throw new Exception("Cuenta no encontrada");
+	    }
+	}
 }
